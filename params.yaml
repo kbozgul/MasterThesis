@@ -1,0 +1,31 @@
+#time: sec
+#length: micrometer
+#stiffness: pikoNewton/mikrometer
+#force:pikoNewton
+
+simulation:
+  total_time: 200.0
+  dt: 0.0001
+  record_length: False #saves certain data, check supp_files/save_functions.py
+  save_resolution : 1 #save length once in every dt
+pilus:
+  pilus_initial_length: 0.0
+  L_hook_region: 0.0 #Active length
+  theta_range: 45.0 #in degrees
+  length_state: "inactive" #setting initial value
+  hook_state: "inactive" #setting initial value
+velocities:
+  v_e: 0.42 #0.42
+  v_r: 0.55 #0.55
+object_and_pilus:
+  object_initial_distance: 0.6
+  object_radius: 0.12
+length rates:
+  k_on: 0.36 #0.36
+  k_0e: 0.4 #0.4
+  k_0r: 2.5 #2.5
+  k_e0: 0.95 #0.95
+  k_r0: 0.11 #0.11
+hook rates:
+  k_bind: 0.7 #0.7
+  k_unbind: 0.35 #0.35
