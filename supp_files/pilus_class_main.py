@@ -67,7 +67,6 @@ class pilus_object:
                     self.object_dist_record.append(self.object_position)
                     self.pilus_angle_record.append(self.pilus_theta)
                     self.object_angle_record.append(self.object_theta)
-                    self.force_record.append(self.TensionForce())
 
             self.HookOccurenceCounter(self.hook_state)
             self.LengthOccurenceCounter(self.length_state)
@@ -103,10 +102,6 @@ class pilus_object:
             self.object_theta = math.degrees(math.atan(self.object_y/self.object_x))
         else:
             pass
-    
-    def TensionForce(self):
-        F_tension = self.k_spring*(abs(min(0, self.length_diff_record))) #No pushing
-        return F_tension
     
 
     def GillespieAlgorithm(self, rate_dict):
@@ -175,31 +170,3 @@ class pilus_object:
         elif self.length_state == "idle":
             return 0
         
-    def ObjectAngleInterval(self):
-        def ObjectCenterCoordinates():
-            object_theta = self.theta_range / 2
-            x0 = self.object_initial_distance * math.cos(math.radians(object_theta))
-            y0 = self.object_initial_distance * math.sin(math.radians(object_theta))
-            return x0, y0
-
-        def LimitSlopes():
-            x0, y0 = ObjectCenterCoordinates()
-            R_object = self.object_radius
-            denominator = (R_object**2 - x0**2)
-            discriminant = x0**2 + y0**2 - R_object**2
-
-            # Check for division by zero or invalid discriminant
-            if discriminant < 0:
-                raise ValueError("Invalid configuration: Check object radius and coordinates.")
-            
-            sqrt_term = math.sqrt(discriminant)
-            m_plus = (-(x0 * y0) + R_object * sqrt_term) / denominator
-            m_minus = (-(x0 * y0) - R_object * sqrt_term) / denominator
-            return m_plus, m_minus
-        
-        m_plus, m_minus = LimitSlopes()
-        max_angle = math.atan(m_plus)
-        min_angle = math.atan(m_minus)
-        return math.degrees(abs(max_angle - min_angle))
-    
-            

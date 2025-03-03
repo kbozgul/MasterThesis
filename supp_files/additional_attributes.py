@@ -7,7 +7,6 @@ def AdditionalAttributes(self):
         self.object_dist_record = []
         self.object_angle_record = []
         self.pilus_angle_record = []
-        self.force_record = []
 
     self.object_theta = self.theta_range/2
     self.object_position = self.object_initial_distance

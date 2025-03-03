@@ -5,9 +5,17 @@ import shutil
 import yaml
 from .save_helpers import AverageDictionary
 
+
 def CheckandCreateFolder():
-    data_folder_path = r'C:\Users\bozguel\data_for_thesis\2D_new'
-    #data_folder_path = '/home/kaan/Documents/data/2D_spherical'
+    # Get the parent directory of 'supp_files', which contains 'main.py'
+    main_script_dir = os.path.dirname(os.path.abspath(os.path.join(__file__, '..')))
+
+    # Define the folder path next to 'main.py'
+    data_folder_path = os.path.join(main_script_dir, 'data_for_thesis', 'object_uptake_data')
+
+    # Create the folder if it doesn't exist
+    os.makedirs(data_folder_path, exist_ok=True)
+
 
     if not os.path.exists(data_folder_path):
         os.makedirs(data_folder_path)
@@ -23,12 +31,12 @@ def SaveRealization(self, timestamped_folder_path, realization):
     yaml_file_path = os.path.join(folder_path, "other_data.yaml")
 
     if self.record_length == True:
-        csv_file_path = os.path.join(folder_path, "length_record.csv")
+        csv_file_path = os.path.join(folder_path, "record_data.csv")
         with open(csv_file_path, 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(["length", "object_distance", "pilus_angle", "object_angle", "tension_force"])
             for i in range(len(self.length_record)):
-                    writer.writerow([self.length_record[i], self.object_dist_record[i], self.pilus_angle_record[i], self.object_angle_record[i], self.force_record[i]])
+                    writer.writerow([self.length_record[i], self.object_dist_record[i], self.pilus_angle_record[i], self.object_angle_record[i]])
 
 
     with open(metadata_file_path, 'w') as file:
