@@ -4,18 +4,10 @@ def AdditionalAttributes(self):
     #additional assistant attributes
     if self.record_length:
         self.length_record = []
-        self.object_dist_record = []
-        self.object_angle_record = []
-        self.pilus_angle_record = []
+        self.force_record = []
 
-    self.object_theta = self.theta_range/2
-    self.object_position = self.object_initial_distance
-    self.object_reached_cell = False
-    self.object_x = self.object_position * math.cos(math.radians(self.object_theta))
-    self.object_y = self.object_position * math.sin(math.radians(self.object_theta))
 
     self.pilus_length = self.pilus_initial_length
-    self.pilus_theta = 0.0
 
     self.hook_occurence_dict = {}
     self.hook_last_count = 0

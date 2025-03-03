@@ -32,7 +32,7 @@ class pilus_object:
         counter = 0
         progress_interval = int((self.total_time/self.dt)/10)  # Calculate interval for 10% increments
 
-        while (time <= self.total_time) and (self.object_position > self.object_radius):
+        while (time <= self.total_time):
             time += self.dt
             counter += 1
             if counter % progress_interval == 0:  # Check if we've hit a 10% interval
@@ -40,15 +40,16 @@ class pilus_object:
                 print(f"At {int(progress)}% of the Total Time")
 
             if self.pilus_length > 0.0:
-                if self.IsEligibleForHook():
-                    self.ChangeHookState()
-                else:
-                    self.hook_state = "free"
+                self.ChangeHookState()
                 self.ChangeLengthState()
                 length_diff = self.LengthDifference()
-                self.pilus_length = (max([self.pilus_length + length_diff, 0.0]))
                 if self.hook_state == "hooked":
-                    self.MoveObject(length_diff)
+                    self.length_diff_record += length_diff
+                else:
+                    self.length_diff_record += length_diff
+                    self.pilus_length = (max([self.pilus_length + self.length_diff_record, 0.0])) #size can not be smaller than 0
+                    self.length_diff_record = 0.0
+
 
             elif self.pilus_length == 0.0:
                 self.length_state = "inactive"
@@ -57,16 +58,13 @@ class pilus_object:
                 self.ChangeLengthState()
                 if self.length_state == "extend":
                     self.hook_state = "free"
-                    self.pilus_theta = random.uniform(0, self.theta_range)
                     length_diff = self.LengthDifference()
                     self.pilus_length = (max([self.pilus_length + length_diff, 0.0])) #size can not be smaller than 0
 
             if self.record_length:
                 if counter % self.save_resolution == 0:
                     self.length_record.append(self.pilus_length)
-                    self.object_dist_record.append(self.object_position)
-                    self.pilus_angle_record.append(self.pilus_theta)
-                    self.object_angle_record.append(self.object_theta)
+                    self.force_record.append(self.TensionForce())
 
             self.HookOccurenceCounter(self.hook_state)
             self.LengthOccurenceCounter(self.length_state)
@@ -75,33 +73,12 @@ class pilus_object:
         self.LengthOccurenceCounterFinalize()
         self.HookOccurenceCounterFinalize()
         self.LengthActiveOccurenceCounterFinalize()
-        if self.object_position <=  self.object_radius:
-            self.object_reached_cell = True
         self.final_time = time
 
-           
-    def IsEligibleForHook(self): #check if the object is in the right region to be hooked
-        psi = abs(math.radians(self.pilus_theta - self.object_theta))
-        if self.object_position*math.sin(psi) > self.object_radius:
-            return False
-        a = math.sqrt((self.object_radius)**2 - (self.object_position*math.sin(psi))**2)
-        pilus_is_too_short = self.pilus_length < self.object_position*math.cos(psi) - a
-        pilus_is_too_long = self.pilus_length - self.L_hook_region > self.object_position*math.cos(psi) + a
-        if pilus_is_too_short or pilus_is_too_long:
-            return False
-        return True
-
-
-    def MoveObject(self, length_diff):
-        if self.hook_state == "hooked":
-            delta_x = length_diff*math.cos(math.radians(self.pilus_theta)) #important that it is pilus theta
-            delta_y = length_diff*math.sin(math.radians(self.pilus_theta)) #important that it is pilus theta
-            self.object_x = self.object_x + delta_x
-            self.object_y = self.object_y + delta_y
-            self.object_position = math.sqrt(((self.object_x)**2)+((self.object_y)**2))
-            self.object_theta = math.degrees(math.atan(self.object_y/self.object_x))
-        else:
-            pass
+    
+    def TensionForce(self):
+        F_tension = self.k_spring*(abs(min(0, self.length_diff_record))) #No pushing
+        return F_tension
     
 
     def GillespieAlgorithm(self, rate_dict):
@@ -145,12 +122,13 @@ class pilus_object:
             self.length_state = new_state
 
     def ChangeHookState(self):
+        unbind_rate = self.k_unbind*math.exp(self.TensionForce()/self.F_sens)
         hook_prob_dict = {
             "free": {
                 "hooked": self.k_bind
             },
             "hooked": {
-                "free": self.k_unbind
+                "free": unbind_rate
             }
         }
         state_changed, new_state = self.GillespieAlgorithm(hook_prob_dict[self.hook_state])
@@ -160,12 +138,12 @@ class pilus_object:
                 
     def LengthDifference(self):
         dt = self.dt
-
+        retraction_speed = self.v_r*(1-(self.TensionForce())/(self.F_stall))
         if self.length_state == "extend":
             return dt*self.v_e
             
         elif self.length_state == "retract":
-            return - dt*self.v_r
+            return - dt*retraction_speed
         
         elif self.length_state == "idle":
             return 0

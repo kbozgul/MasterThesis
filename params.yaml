@@ -10,16 +10,11 @@ simulation:
   save_resolution : 1 #save length once in every dt
 pilus:
   pilus_initial_length: 0.0
-  L_hook_region: 0.0 #Active length
-  theta_range: 45.0 #in degrees
   length_state: "inactive" #setting initial value
   hook_state: "inactive" #setting initial value
 velocities:
   v_e: 0.42 #0.42
   v_r: 0.55 #0.55
-object_and_pilus:
-  object_initial_distance: 0.6
-  object_radius: 0.12
 length rates:
   k_on: 0.36 #0.36
   k_0e: 0.4 #0.4
@@ -29,3 +24,7 @@ length rates:
 hook rates:
   k_bind: 0.7 #0.7
   k_unbind: 0.35 #0.35
+force related:
+  k_spring: 2000
+  F_stall: 250
+  F_sens: 50 #pikoNewton
